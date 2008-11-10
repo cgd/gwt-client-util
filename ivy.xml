@@ -11,6 +11,10 @@
     </publications>
     
     <dependencies>
+        <dependency
+            org="com.google"
+            name="gwt"
+            rev="latest.integration"/>
     </dependencies>
     
 </ivy-module>
