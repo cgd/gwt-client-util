@@ -1,0 +1,20 @@
+@CHARSET "UTF-8";
+
+.jax-ZoomScrollBar-SliderRight {
+	z-index: 1;
+	cursor: e-resize;
+}
+
+.jax-ZoomScrollBar-SliderLeft {
+	z-index: 1;
+	cursor: w-resize;
+}
+
+.jax-ZoomScrollBar-SliderCenter {
+	z-index: 1;
+	cursor: move;
+	background-color: rgb(188, 220, 152);
+	opacity: 0.4;
+	filter: alpha(opacity = 40);
+	-moz-opacity: 0.4;
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project
+    xmlns:ivy="antlib:org.apache.ivy.ant"
+    name="jax-util"
+    default="dist"
+    basedir=".">
+    
+    <description>
+        build file for common utilities used by jax.org projects
+    </description>
+    
+    <import file="build-properties.xml"/>
+    <import file="${common.build.dir}/build-common.xml"/>
+    
+    <target name="dist-nodeps" depends="ivy-retrieve,zip-java-src"/>
+    
+    <target name="zip-java-src" description="Zip up the src/java contents">
+        <!-- Create the dist directory -->
+        <mkdir dir="${dist}"/>
+        
+        <!-- zip up the src dir -->
+        <ivy:info file="ivy.xml"/>
+        <zip destfile="${dist}/${ivy.module}-src-${ivy.revision}.zip">
+            <fileset dir="${src}/java"/>
+        </zip>
+    </target>
+</project>
