@@ -448,9 +448,6 @@ public abstract class ZoomScrollBar extends Composite
             }
         }
 
-        /**
-         * @param deltaX
-         */
         private void dragRightZoomHandle(int deltaX)
         {
             int newSelectedRangeEnd =
@@ -480,9 +477,6 @@ public abstract class ZoomScrollBar extends Composite
             }
         }
 
-        /**
-         * @param deltaX
-         */
         private void dragLeftZoomHandle(int deltaX)
         {
             int newSelectedRangeStart =
