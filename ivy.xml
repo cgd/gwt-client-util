@@ -7,7 +7,7 @@
     </configurations>
 
     <publications>
-        <artifact name="gwt-client-util-src" type="zip" ext="zip"/>
+        <artifact name="gwt-client-util-src" type="jar" ext="jar"/>
     </publications>
     
     <dependencies>

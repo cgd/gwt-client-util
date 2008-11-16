@@ -21,8 +21,8 @@
         
         <!-- zip up the src dir -->
         <ivy:info file="ivy.xml"/>
-        <zip destfile="${dist}/${ivy.module}-src-${ivy.revision}.zip">
+        <jar destfile="${dist}/${ivy.module}-src-${ivy.revision}.jar">
             <fileset dir="${src}/java"/>
-        </zip>
+        </jar>
     </target>
 </project>
