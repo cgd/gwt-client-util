@@ -15,9 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jax.haplotype.gwtutil.client;
-
-
+package org.jax.gwtutil.client;
 
 /**
  * For zoom/scrolls that use a 0.0-1.0 range

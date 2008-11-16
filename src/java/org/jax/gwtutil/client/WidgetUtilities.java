@@ -20,7 +20,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.jax.haplotype.gwtutil.client;
+package org.jax.gwtutil.client;
 
 import java.util.Arrays;
 import java.util.List;

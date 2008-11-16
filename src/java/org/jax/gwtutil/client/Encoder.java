@@ -20,7 +20,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.jax.haplotype.gwtutil.client;
+package org.jax.gwtutil.client;
 
 import java.util.List;
 
@@ -66,14 +66,7 @@ public class Encoder
         return encodeURIComponentImpl(uriString);
     }
     
-    /**
-     * JavaScript native function to encode the given string as a URL
-     * component
-     * @param stringToEncode
-     * @return
-     *          the encoded string
-     */
-    private static native String encodeURIComponentImpl(String stringToEncode) /*-{
-        return encodeURIComponent(stringToEncode);
+    private static native String encodeURIComponentImpl(String decodedURLComponent) /*-{
+        return encodeURIComponent(decodedURLComponent);
     }-*/;
 }

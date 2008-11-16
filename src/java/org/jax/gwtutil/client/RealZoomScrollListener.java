@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jax.haplotype.gwtutil.client;
-
+package org.jax.gwtutil.client;
 
 /**
  * Interface that should be implemented to listen to
