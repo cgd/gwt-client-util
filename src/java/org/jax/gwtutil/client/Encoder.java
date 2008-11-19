@@ -66,6 +66,13 @@ public class Encoder
         return encodeURIComponentImpl(uriString);
     }
     
+    /**
+     * Native JavaScript function to uncode the given URL component
+     * @param decodedURLComponent
+     *          the URL component to encode
+     * @return
+     *          the URL component
+     */
     private static native String encodeURIComponentImpl(String decodedURLComponent) /*-{
         return encodeURIComponent(decodedURLComponent);
     }-*/;
