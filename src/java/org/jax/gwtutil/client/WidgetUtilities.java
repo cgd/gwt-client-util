@@ -23,7 +23,10 @@ package org.jax.gwtutil.client;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -135,5 +138,46 @@ public class WidgetUtilities
         }
         
         return -1;
+    }
+    
+    /**
+     * Create a message
+     * @param messageType
+     *          the type of message
+     * @param message
+     *          the message text
+     * @return
+     *          the message
+     */
+    public static Widget createMessage(MessageType messageType, String message)
+    {
+        return createMessage(messageType, new InlineLabel(message));
+    }
+    
+    /**
+     * Create a message
+     * @param messageType
+     *          the type of message
+     * @param messageWidget
+     *          the message widget (usually inline label or inline HTML)
+     * @return
+     *          the message
+     */
+    public static Widget createMessage(MessageType messageType, Widget messageWidget)
+    {
+        FlowPanel panel = new FlowPanel();
+        panel.setStyleName("jax-MessagePanel");
+        
+        if(messageType.getIconUrl() != null)
+        {
+            Image icon = new Image(messageType.getIconUrl());
+            icon.addStyleName(messageType.getStyle());
+            panel.add(icon);
+        }
+        
+        messageWidget.addStyleName(messageType.getStyle());
+        panel.add(messageWidget);
+        
+        return panel;
     }
 }

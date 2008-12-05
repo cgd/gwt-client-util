@@ -18,3 +18,16 @@
 	filter: alpha(opacity = 40);
 	-moz-opacity: 0.4;
 }
+
+.jax-ErrorMessage {
+    color: red;
+    vertical-align: middle;
+}
+
+.jax-PlainMessage {
+    vertical-align: middle;
+}
+
+.jax-MessagePanel {
+    display: inline;
+}

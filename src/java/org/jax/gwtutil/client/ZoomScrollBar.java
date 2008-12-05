@@ -51,8 +51,8 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
     private static final String BACK_PANEL_STYLE_NAME =
         BASE_STYLE_NAME + "-BackPanel";
     
-    private static final String LEFT_SLIDER_IMAGE_URL = "left-zoom-handle.png";
-    private static final String RIGHT_SLIDER_IMAGE_URL = "right-zoom-handle.png";
+    private static final String LEFT_SLIDER_IMAGE_URL = "images/left-zoom-handle.png";
+    private static final String RIGHT_SLIDER_IMAGE_URL = "images/right-zoom-handle.png";
     
     private int widthPixles = 0;
 
