@@ -44,7 +44,7 @@ public class Encoder
         {
             if(i >= 1)
             {
-                sb.append(',');
+                sb.append('-');
             }
             sb.append(list.get(i).toString());
         }
@@ -53,7 +53,7 @@ public class Encoder
     
     /**
      * Like {@link com.google.gwt.http.client.URL#encodeComponent(String)}
-     * except we use "%20" for spaces
+     * except we use "%20" for spaces. Also encode '/' as ", " and ',' as ",,"
      * @param uriString
      *          the string to encode
      * @return
@@ -61,7 +61,18 @@ public class Encoder
      */
     public static String encodeURIComponent(String uriString)
     {
-        return encodeURIComponentImpl(uriString);
+        return encodeURIComponentImpl(encodeSlashes(uriString));
+    }
+    
+    /**
+     * encode '/' as ", " and ',' as ",,". The reason we have to do this is
+     * that many web
+     * @param uriString
+     *          the string to encode
+     */
+    private static String encodeSlashes(String uriString)
+    {
+        return uriString.replace(",", ",,").replace("/", ", ");
     }
     
     /**
