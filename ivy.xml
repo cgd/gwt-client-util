@@ -14,7 +14,8 @@
         <dependency
             org="com.google"
             name="gwt"
-            rev="latest.integration"/>
+            rev="latest.integration"
+            conf="*->client"/>
     </dependencies>
     
 </ivy-module>
