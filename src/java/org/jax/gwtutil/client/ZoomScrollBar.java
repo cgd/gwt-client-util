@@ -20,26 +20,36 @@
 
 package org.jax.gwtutil.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.event.dom.client.ErrorEvent;
+import com.google.gwt.event.dom.client.ErrorHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventPreview;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.LoadListener;
-import com.google.gwt.user.client.ui.MouseListener;
-import com.google.gwt.user.client.ui.SourcesLoadEvents;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Base class for zoom-scroll bars
  * @author <A HREF="mailto:keith.sheppard@jax.org">Keith Sheppard</A>
  */
-public abstract class ZoomScrollBar extends Composite implements SourcesLoadEvents
+public abstract class ZoomScrollBar extends Composite
 {
     private static final String BASE_STYLE_NAME = "jax-ZoomScrollBar";
     private static final String SLIDER_RIGHT_STYLE_NAME =
@@ -63,72 +73,50 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
     private final Image rightSliderImage;
     private final Widget centerSliderWidget;
     
-    private boolean leftSliderLoaded = false;
     private int leftSliderWidth = 0;
-    private boolean rightSliderLoaded = false;
     private int rightSliderWidth = 0;
     private int maximumImageHeight = 0;
     private int backgroundImageWidth = 0;
     
     private Image backgroundImage;
+    private HandlerRegistration backgroundLoadReg;
+    private HandlerRegistration backgroundErrorReg;
     
-    private final List<LoadListener> loadListeners =
-        new ArrayList<LoadListener>();
-    
-    private final LoadListener resizeOnLoadListener = new LoadListener()
+    private final LoadHandler resizeOnLoadListener = new LoadHandler()
     {
         /**
          * {@inheritDoc}
          */
-        public void onError(Widget sender)
+        public void onLoad(LoadEvent event)
         {
-            System.err.println("Failed to load: " + sender);
-            
-            if(sender == ZoomScrollBar.this.leftSliderImage ||
-               sender == ZoomScrollBar.this.rightSliderImage)
-            {
-                ZoomScrollBar.this.fireOnError();
-            }
-        }
-        
-        /**
-         * {@inheritDoc}
-         */
-        public void onLoad(Widget sender)
-        {
-            if(sender == ZoomScrollBar.this.leftSliderImage ||
-               sender == ZoomScrollBar.this.rightSliderImage)
-            {
-                if(sender == ZoomScrollBar.this.leftSliderImage)
-                {
-                    ZoomScrollBar.this.leftSliderLoaded = true;
-                }
-                else
-                {
-                    ZoomScrollBar.this.rightSliderLoaded = true;
-                }
-                
-                if(ZoomScrollBar.this.isLoaded())
-                {
-                    ZoomScrollBar.this.fireOnLoad();
-                }
-            }
-            
             ZoomScrollBar.this.resizeScrollBar();
         }
     };
-
-    private static EventPreview preventDefaultMouseEvents = new EventPreview()
+    
+    private final ErrorHandler errorHandler = new ErrorHandler()
     {
-        public boolean onEventPreview(Event event)
+        public void onError(ErrorEvent event)
         {
-            switch(DOM.eventGetType(event))
+            System.err.println("Failed to load: " + event.getSource());
+        }
+    };
+    
+    private HandlerRegistration previewRegistration;
+
+    private static NativePreviewHandler preventDefaultMouseEvents = new NativePreviewHandler()
+    {
+        /**
+         * {@inheritDoc}
+         */
+        public void onPreviewNativeEvent(NativePreviewEvent event)
+        {
+            
+            switch(event.getTypeInt())
             {
                 case Event.ONMOUSEDOWN:
                 case Event.ONMOUSEMOVE:
-                    DOM.eventPreventDefault(event);
+                    event.getNativeEvent().preventDefault();
             }
-            return true;
         }
     };
 
@@ -145,12 +133,14 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
         this.absolutePositionsPanel.setStyleName(BACK_PANEL_STYLE_NAME);
         
         this.leftSliderImage = new Image(LEFT_SLIDER_IMAGE_URL);
-        this.leftSliderImage.addLoadListener(this.resizeOnLoadListener);
+        this.leftSliderImage.addLoadHandler(this.resizeOnLoadListener);
+        this.leftSliderImage.addErrorHandler(this.errorHandler);
         this.leftSliderImage.setStyleName(SLIDER_LEFT_STYLE_NAME);
         this.absolutePositionsPanel.add(this.leftSliderImage);
         
         this.rightSliderImage = new Image(RIGHT_SLIDER_IMAGE_URL);
-        this.rightSliderImage.addLoadListener(this.resizeOnLoadListener);
+        this.rightSliderImage.addLoadHandler(this.resizeOnLoadListener);
+        this.rightSliderImage.addErrorHandler(this.errorHandler);
         this.rightSliderImage.setStyleName(SLIDER_RIGHT_STYLE_NAME);
         this.absolutePositionsPanel.add(this.rightSliderImage);
         
@@ -158,56 +148,13 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
         this.centerSliderWidget.setStyleName(SLIDER_MIDDLE_STYLE_NAME);
         this.absolutePositionsPanel.add(this.centerSliderWidget);
         
-        this.mainFocusPanel.addMouseListener(new ScrollZoomMouseListener());
-    }
-    
-    /**
-     * Determine if all of the "decoration" images have loaded
-     * @see #addLoadListener(LoadListener)
-     * @return
-     *          true if everything has loaded OK
-     */
-    public boolean isLoaded()
-    {
-        return this.leftSliderLoaded && this.rightSliderLoaded;
-    }
-    
-    private void fireOnLoad()
-    {
-        for(LoadListener listener: this.loadListeners)
-        {
-            listener.onLoad(this);
-        }
-    }
-
-    private void fireOnError()
-    {
-        for(LoadListener listener: this.loadListeners)
-        {
-            listener.onError(this);
-        }
-    }
-
-    /**
-     * "Load notification happens when all of "decoration" images have completed
-     * loading. After this is done {@link #getImageWidthForScrollBarWidth(int)}
-     * should return valid results. Note that this function does not care
-     * about the background image and when it is loaded
-     * ({@link #getBackgroundImage()}).
-     * @param listener
-     *          the listener to notify on load
-     */
-    public void addLoadListener(LoadListener listener)
-    {
-        this.loadListeners.add(listener);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void removeLoadListener(LoadListener listener)
-    {
-        this.loadListeners.remove(listener);
+        ScrollZoomMouseListener scrollZoomListener =
+            new ScrollZoomMouseListener();
+        this.mainFocusPanel.addMouseUpHandler(scrollZoomListener);
+        this.mainFocusPanel.addMouseDownHandler(scrollZoomListener);
+        this.mainFocusPanel.addMouseOverHandler(scrollZoomListener);
+        this.mainFocusPanel.addMouseOutHandler(scrollZoomListener);
+        this.mainFocusPanel.addMouseMoveHandler(scrollZoomListener);
     }
     
     /**
@@ -236,7 +183,6 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
      * {@link #setBackgroundImage(Image)} to achieve the desired
      * total zoom/scroll bar with. This accounts for the handle widgets that
      * are at either side of this widget
-     * @see #addLoadListener(LoadListener)
      * @param desiredScrollBarWidth
      *          the scroll bar width that we want to achieve
      * @return
@@ -265,8 +211,8 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
     {
         if(this.backgroundImage != null)
         {
-            this.backgroundImage.removeLoadListener(
-                    this.resizeOnLoadListener);
+            this.backgroundLoadReg.removeHandler();
+            this.backgroundErrorReg.removeHandler();
             this.absolutePositionsPanel.remove(this.backgroundImage);
         }
         
@@ -274,8 +220,10 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
         
         if(this.backgroundImage != null)
         {
-            this.backgroundImage.addLoadListener(
+            this.backgroundLoadReg = this.backgroundImage.addLoadHandler(
                     this.resizeOnLoadListener);
+            this.backgroundErrorReg = this.backgroundImage.addErrorHandler(
+                    this.errorHandler);
             this.absolutePositionsPanel.add(this.backgroundImage);
         }
         
@@ -413,7 +361,8 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
         NO_DRAG
     }
     
-    private class ScrollZoomMouseListener implements MouseListener
+    private class ScrollZoomMouseListener
+    implements MouseUpHandler, MouseDownHandler, MouseOverHandler, MouseOutHandler, MouseMoveHandler
     {
         /**
          * The starting drag position
@@ -433,13 +382,31 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
         private int dragStartFullRangeStart;
         
         private int dragStartFullRangeEnd;
+
         
         /**
          * {@inheritDoc}
          */
-        public void onMouseDown(Widget widget, int x, int y)
+        public void onMouseUp(MouseUpEvent event)
         {
-            this.dragStartX = x;
+            if(this.dragType != DragType.NO_DRAG)
+            {
+                this.dragType = DragType.NO_DRAG;
+                
+                Widget widget = (Widget)event.getSource();
+                DOM.releaseCapture(widget.getElement());
+                ZoomScrollBar.this.zoomScrollComplete();
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void onMouseDown(MouseDownEvent event)
+        {
+            Widget widget = (Widget)event.getSource();
+            
+            this.dragStartX = event.getX();
             this.dragStartSelectedRangeExtent =
                 ZoomScrollBar.this.getSelectedRangeExtentInPixels();
             this.dragStartSelectedRangeStart =
@@ -485,9 +452,29 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
         /**
          * {@inheritDoc}
          */
-        public void onMouseMove(Widget widget, int x, int y)
+        public void onMouseOver(MouseOverEvent event)
         {
-            int deltaX = x - this.dragStartX;
+            ZoomScrollBar.this.previewRegistration =
+                Event.addNativePreviewHandler(preventDefaultMouseEvents);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void onMouseOut(MouseOutEvent event)
+        {
+            if(ZoomScrollBar.this.previewRegistration != null)
+            {
+                ZoomScrollBar.this.previewRegistration.removeHandler();
+            }
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        public void onMouseMove(MouseMoveEvent event)
+        {
+            int deltaX = event.getX() - this.dragStartX;
             switch(this.dragType)
             {
                 case LEFT_ZOOM_HANDLE:
@@ -612,35 +599,6 @@ public abstract class ZoomScrollBar extends Composite implements SourcesLoadEven
                         this.dragStartSelectedRangeExtent - deltaX,
                         false);
             }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void onMouseUp(Widget widget, int x, int y)
-        {
-            if(this.dragType != DragType.NO_DRAG)
-            {
-                this.dragType = DragType.NO_DRAG;
-                DOM.releaseCapture(widget.getElement());
-                ZoomScrollBar.this.zoomScrollComplete();
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void onMouseEnter(Widget sender)
-        {
-            DOM.addEventPreview(preventDefaultMouseEvents);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void onMouseLeave(Widget sender)
-        {
-            DOM.removeEventPreview(preventDefaultMouseEvents);
         }
     }
 

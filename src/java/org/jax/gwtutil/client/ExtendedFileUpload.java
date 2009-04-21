@@ -23,21 +23,26 @@ package org.jax.gwtutil.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jax.gwtutil.client.event.ChangeBroadcaster;
+import org.jax.gwtutil.client.event.ChangeListener;
+
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A file upload extended to publish change events
+ * TODO is there a smart way to have this use the ChangeHandler types instead?
  * @author <A HREF="mailto:keith.sheppard@jax.org">Keith Sheppard</A>
  */
-public class ExtendedFileUpload extends FileUpload
+public class ExtendedFileUpload
+extends FileUpload
+implements ChangeBroadcaster<ExtendedFileUpload>
 {
-    private List<ChangeListener> changeListeners = null;
+    private List<ChangeListener<ExtendedFileUpload>> changeListeners = null;
     
     /**
      * Constructor
@@ -90,11 +95,13 @@ public class ExtendedFileUpload extends FileUpload
      * @param changeListener
      *          the change listener
      */
-    public void addChangeListener(ChangeListener changeListener)
+    public void addChangeListener(
+            ChangeListener<ExtendedFileUpload> changeListener)
     {
         if(this.changeListeners == null)
         {
-            this.changeListeners = new ArrayList<ChangeListener>();
+            this.changeListeners =
+                new ArrayList<ChangeListener<ExtendedFileUpload>>();
         }
         this.changeListeners.add(changeListener);
     }
@@ -104,7 +111,8 @@ public class ExtendedFileUpload extends FileUpload
      * @param changeListener
      *          the change listener
      */
-    public void removeChangeListener(ChangeListener changeListener)
+    public void removeChangeListener(
+            ChangeListener<ExtendedFileUpload> changeListener)
     {
         if(this.changeListeners != null)
         {
@@ -121,9 +129,9 @@ public class ExtendedFileUpload extends FileUpload
         super.onBrowserEvent(event);
         if(event.getTypeInt() == Event.ONCHANGE && this.changeListeners != null)
         {
-            for(ChangeListener listener: this.changeListeners)
+            for(ChangeListener<ExtendedFileUpload> listener: this.changeListeners)
             {
-                listener.onChange(this);
+                listener.changeOccured(this);
             }
         }
     }
