@@ -57,6 +57,26 @@ public class WidgetUtilities
     }
     
     /**
+     * A convenience function for getting the selected value text
+     * @param listBox
+     *          the list box to get the text from
+     * @return
+     *          the text or null if nothing is selected
+     */
+    public static String getSelectedValue(ListBox listBox)
+    {
+        int selectedIndex = listBox.getSelectedIndex();
+        if(selectedIndex >= 0)
+        {
+            return listBox.getValue(selectedIndex);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    /**
      * Update the list box using the given entries
      * @param newEntries
      *          the entries
