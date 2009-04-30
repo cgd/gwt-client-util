@@ -20,15 +20,11 @@
 
 package org.jax.gwtutil.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jax.gwtutil.client.event.ChangeBroadcaster;
-import org.jax.gwtutil.client.event.ChangeListener;
-
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.Event;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,30 +34,24 @@ import com.google.gwt.user.client.ui.Widget;
  * TODO is there a smart way to have this use the ChangeHandler types instead?
  * @author <A HREF="mailto:keith.sheppard@jax.org">Keith Sheppard</A>
  */
-public class ExtendedFileUpload
-extends FileUpload
-implements ChangeBroadcaster<ExtendedFileUpload>
+public class ExtendedFileUpload extends FileUpload
 {
-    private List<ChangeListener<ExtendedFileUpload>> changeListeners = null;
-    
     /**
      * Constructor
      */
     public ExtendedFileUpload()
     {
         super();
-        this.sinkEvents(Event.ONCHANGE);
     }
 
     /**
-     * Constructor for wrapping an existing element
+     * protected constructor for wrapping an existing element
      * @param element
      *          the element to wrap
      */
     protected ExtendedFileUpload(Element element)
     {
         super(element);
-        this.sinkEvents(Event.ONCHANGE);
     }
 
     /**
@@ -91,48 +81,15 @@ implements ChangeBroadcaster<ExtendedFileUpload>
     }
     
     /**
-     * Add a change listener to this widget
-     * @param changeListener
-     *          the change listener
+     * Add a change handler to this file upload so that we are notified when
+     * the user selects a file.
+     * @param changeHandler
+     *          the change handler to register
+     * @return
+     *          the registration
      */
-    public void addChangeListener(
-            ChangeListener<ExtendedFileUpload> changeListener)
+    public HandlerRegistration addChangeHandler(ChangeHandler changeHandler)
     {
-        if(this.changeListeners == null)
-        {
-            this.changeListeners =
-                new ArrayList<ChangeListener<ExtendedFileUpload>>();
-        }
-        this.changeListeners.add(changeListener);
-    }
-    
-    /**
-     * Remove a change listener from this widget
-     * @param changeListener
-     *          the change listener
-     */
-    public void removeChangeListener(
-            ChangeListener<ExtendedFileUpload> changeListener)
-    {
-        if(this.changeListeners != null)
-        {
-            this.changeListeners.remove(changeListener);
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onBrowserEvent(Event event)
-    {
-        super.onBrowserEvent(event);
-        if(event.getTypeInt() == Event.ONCHANGE && this.changeListeners != null)
-        {
-            for(ChangeListener<ExtendedFileUpload> listener: this.changeListeners)
-            {
-                listener.changeOccured(this);
-            }
-        }
+        return this.addDomHandler(changeHandler, ChangeEvent.getType());
     }
 }
